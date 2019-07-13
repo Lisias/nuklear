@@ -22,6 +22,7 @@ typedef struct ID3D11DeviceContext ID3D11DeviceContext;
 NK_API struct nk_context *nk_d3d11_init(ID3D11Device *device, int width, int height, unsigned int max_vertex_buffer, unsigned int max_index_buffer);
 NK_API void nk_d3d11_font_stash_begin(struct nk_font_atlas **atlas);
 NK_API void nk_d3d11_font_stash_end(void);
+NK_API void nk_d3d11_upload_skin_texture(int w, int h, const void* image);
 NK_API int nk_d3d11_handle_event(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 NK_API void nk_d3d11_render(ID3D11DeviceContext *context, enum nk_anti_aliasing);
 NK_API void nk_d3d11_resize(ID3D11DeviceContext *context, int width, int height);
@@ -76,6 +77,7 @@ static struct
     ID3D11Buffer *index_buffer;
     ID3D11Buffer *vertex_buffer;
     ID3D11ShaderResourceView *font_texture_view;
+	ID3D11ShaderResourceView* skin_texture_view;
     ID3D11SamplerState *sampler_state;
 } d3d11;
 
@@ -524,7 +526,8 @@ nk_d3d11_init(ID3D11Device *device, int width, int height, unsigned int max_vert
     /* sampler state */
     {D3D11_SAMPLER_DESC desc;
     memset(&desc, 0, sizeof(desc));
-    desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    //desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	desc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
     desc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
     desc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
     desc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -596,6 +599,43 @@ nk_d3d11_font_stash_end(void)
     nk_font_atlas_end(&d3d11.atlas, nk_handle_ptr(d3d11.font_texture_view), &d3d11.null);
     if (d3d11.atlas.default_font)
         nk_style_set_font(&d3d11.ctx, &d3d11.atlas.default_font->handle);
+}
+
+NK_API void
+nk_d3d11_upload_skin_texture(int w, int h, const void* image)
+{
+	{ID3D11Texture2D* skin_texture;
+	HRESULT hr;
+
+	D3D11_TEXTURE2D_DESC desc;
+	memset(&desc, 0, sizeof(desc));
+	desc.Width = (UINT)w;
+	desc.Height = (UINT)h;
+	desc.MipLevels = 1;
+	desc.ArraySize = 1;
+	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	desc.CPUAccessFlags = 0;
+
+	{D3D11_SUBRESOURCE_DATA data;
+	data.pSysMem = image;
+	data.SysMemPitch = (UINT)(w * 4);
+	data.SysMemSlicePitch = 0;
+	hr = ID3D11Device_CreateTexture2D(d3d11.device, &desc, &data, &skin_texture);
+	assert(SUCCEEDED(hr)); }
+
+	{D3D11_SHADER_RESOURCE_VIEW_DESC srv;
+	memset(&srv, 0, sizeof(srv));
+	srv.Format = desc.Format;
+	srv.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srv.Texture2D.MipLevels = 1;
+	srv.Texture2D.MostDetailedMip = 0;
+	hr = ID3D11Device_CreateShaderResourceView(d3d11.device, (ID3D11Resource*)skin_texture, &srv, &d3d11.skin_texture_view);
+	assert(SUCCEEDED(hr)); }
+	ID3D11Texture2D_Release(skin_texture); }
 }
 
 NK_API

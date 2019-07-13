@@ -26,6 +26,9 @@
 #include "../../nuklear.h"
 #include "nuklear_d3d11.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "../../example/stb_image.h"
+
 /* ===============================================================
  *
  *                          EXAMPLE
@@ -129,6 +132,14 @@ WindowProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam)
     return DefWindowProcW(wnd, msg, wparam, lparam);
 }
 
+struct media {
+	struct nk_nine_patch header;
+	struct nk_nine_patch window;
+	struct nk_nine_patch button;
+	struct nk_nine_patch button_hover;
+	struct nk_nine_patch button_active;
+};
+
 int main(void)
 {
     struct nk_context *ctx;
@@ -202,6 +213,30 @@ int main(void)
     nk_d3d11_font_stash_end();
     /*nk_style_load_all_cursors(ctx, atlas->cursors);*/
     /*nk_style_set_font(ctx, &droid->handle)*/;}
+
+	struct media media;
+	{
+		int w, h, n;
+		unsigned char* image = stbi_load("skin.png", &w, &h, &n, 0);
+		nk_d3d11_upload_skin_texture(w, h, image);
+		stbi_image_free(image);
+
+		media.button = nk_sub_nine_patch_ptr(d3d11.skin_texture_view, w, h,
+			nk_rect(40, 30, 12, 12),
+			4, 4, 4, 4
+		);
+
+		ctx->style.button.normal = nk_style_item_nine_patch(media.button);
+
+		/*media.window = nk_subimage_id(media.skin, 512, 512, nk_rect(128, 23, 127, 104));
+		media.header = nk_sub_nine_patch_ptr(d3d11.skin_texture_view, 512, 512,
+			nk_rect(128, 0, 127, 24),
+			0, 0, 0, 0
+		);
+		media.button_hover = nk_subimage_id(media.skin, 512, 512, nk_rect(384, 368, 127, 31));
+		media.button_active = nk_subimage_id(media.skin, 512, 512, nk_rect(384, 400, 127, 31));*/
+	}
+	
 
     /* style.c */
     #ifdef INCLUDE_STYLE
