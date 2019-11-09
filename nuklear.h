@@ -1434,7 +1434,7 @@ NK_API const struct nk_draw_command* nk__draw_next(const struct nk_draw_command*
 /// NK_WINDOW_SCALABLE          | The scalable flag indicates that a window can be scaled by user input by dragging a scaler icon at the button of the window
 /// NK_WINDOW_CLOSABLE          | Adds a closable icon into the header
 /// NK_WINDOW_MINIMIZABLE       | Adds a minimize icon into the header
-/// NK_WINDOW_NO_SCROLLBAR      | Removes the scrollbars from the window
+/// NK_WINDOW_NO_SCROLLBAR      | Removes the scrollbasr from the window
 /// NK_WINDOW_NO_VSCROLLBAR     | Removes the vertical scrollbar from the window
 /// NK_WINDOW_NO_HSCROLLBAR     | Removes the horizontal scrollbar from the window
 /// NK_WINDOW_TITLE             | Forces a header at the top at the window showing the title
@@ -15906,8 +15906,9 @@ nk_panel_begin(struct nk_context *ctx, const char *title, enum nk_panel_type pan
     layout->row.tree_depth = 0;
     layout->row.height = panel_padding.y;
     layout->has_scrolling = nk_true;
-    if (!(win->flags & NK_WINDOW_NO_VSCROLLBAR))
-        layout->bounds.w -= scrollbar_size.x;
+    // new v scrollbar style: draw over content, so do not carve out space in the bounds
+    /*if (!(win->flags & NK_WINDOW_NO_VSCROLLBAR))
+        layout->bounds.w -= scrollbar_size.x;*/
     if (!nk_panel_is_nonblock(panel_type)) {
         layout->footer_height = 0;
         if (!(win->flags & NK_WINDOW_NO_HSCROLLBAR) || win->flags & NK_WINDOW_SCALABLE)
@@ -16173,7 +16174,8 @@ nk_panel_end(struct nk_context *ctx)
         if (!(layout->flags & NK_WINDOW_NO_VSCROLLBAR)) {
             /* vertical scrollbar */
             nk_flags state = 0;
-            scroll.x = layout->bounds.x + layout->bounds.w + panel_padding.x;
+            // new v scrollbar style: draw over content
+            scroll.x = layout->bounds.x + layout->bounds.w + panel_padding.x - scrollbar_size.x;
             scroll.y = layout->bounds.y;
             scroll.w = scrollbar_size.x;
             scroll.h = layout->bounds.h;
