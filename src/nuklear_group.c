@@ -92,8 +92,10 @@ nk_group_scrolled_end(struct nk_context *ctx)
         pan.bounds.w += 2*g->border;
         pan.bounds.h += 2*g->border;
     }
-    if (!(g->flags & NK_WINDOW_NO_SCROLLBAR)) {
+    if (!(g->flags & NK_WINDOW_NO_VSCROLLBAR)) {
         pan.bounds.w += ctx->style.window.scrollbar_size.x;
+    }
+    if (!(g->flags & NK_WINDOW_NO_HSCROLLBAR)) {
         pan.bounds.h += ctx->style.window.scrollbar_size.y;
     }
     pan.scrollbar.x = *g->offset_x;

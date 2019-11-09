@@ -1434,7 +1434,9 @@ NK_API const struct nk_draw_command* nk__draw_next(const struct nk_draw_command*
 /// NK_WINDOW_SCALABLE          | The scalable flag indicates that a window can be scaled by user input by dragging a scaler icon at the button of the window
 /// NK_WINDOW_CLOSABLE          | Adds a closable icon into the header
 /// NK_WINDOW_MINIMIZABLE       | Adds a minimize icon into the header
-/// NK_WINDOW_NO_SCROLLBAR      | Removes the scrollbar from the window
+/// NK_WINDOW_NO_SCROLLBAR      | Removes the scrollbars from the window
+/// NK_WINDOW_NO_VSCROLLBAR     | Removes the vertical scrollbar from the window
+/// NK_WINDOW_NO_HSCROLLBAR     | Removes the horizontal scrollbar from the window
 /// NK_WINDOW_TITLE             | Forces a header at the top at the window showing the title
 /// NK_WINDOW_SCROLL_AUTO_HIDE  | Automatically hides the window scrollbar if no user interaction: also requires delta time in `nk_context` to be set each frame
 /// NK_WINDOW_BACKGROUND        | Always keep window in the background
@@ -1454,13 +1456,16 @@ enum nk_panel_flags {
     NK_WINDOW_SCALABLE          = NK_FLAG(2),
     NK_WINDOW_CLOSABLE          = NK_FLAG(3),
     NK_WINDOW_MINIMIZABLE       = NK_FLAG(4),
-    NK_WINDOW_NO_SCROLLBAR      = NK_FLAG(5),
+    NK_WINDOW_NO_VSCROLLBAR     = NK_FLAG(5),
     NK_WINDOW_TITLE             = NK_FLAG(6),
     NK_WINDOW_SCROLL_AUTO_HIDE  = NK_FLAG(7),
     NK_WINDOW_BACKGROUND        = NK_FLAG(8),
     NK_WINDOW_SCALE_LEFT        = NK_FLAG(9),
-    NK_WINDOW_NO_INPUT          = NK_FLAG(10)
+    NK_WINDOW_NO_INPUT          = NK_FLAG(10),
+    NK_WINDOW_NO_HSCROLLBAR     = NK_FLAG(11),
+    NK_WINDOW_NO_SCROLLBAR      = NK_WINDOW_NO_VSCROLLBAR|NK_WINDOW_NO_HSCROLLBAR
 };
+
 /*/// #### nk_begin
 /// Starts a new window; needs to be called every frame for every
 /// window (unless hidden) or otherwise the window gets removed
@@ -5378,20 +5383,20 @@ struct nk_panel {
 
 struct nk_table;
 enum nk_window_flags {
-    NK_WINDOW_PRIVATE       = NK_FLAG(11),
+    NK_WINDOW_PRIVATE       = NK_FLAG(12),
     NK_WINDOW_DYNAMIC       = NK_WINDOW_PRIVATE,
     /* special window type growing up in height while being filled to a certain maximum height */
-    NK_WINDOW_ROM           = NK_FLAG(12),
+    NK_WINDOW_ROM           = NK_FLAG(13),
     /* sets window widgets into a read only mode and does not allow input changes */
     NK_WINDOW_NOT_INTERACTIVE = NK_WINDOW_ROM|NK_WINDOW_NO_INPUT,
     /* prevents all interaction caused by input to either window or widgets inside */
-    NK_WINDOW_HIDDEN        = NK_FLAG(13),
+    NK_WINDOW_HIDDEN        = NK_FLAG(14),
     /* Hides window and stops any window interaction and drawing */
-    NK_WINDOW_CLOSED        = NK_FLAG(14),
+    NK_WINDOW_CLOSED        = NK_FLAG(15),
     /* Directly closes and frees the window at the end of the frame */
-    NK_WINDOW_MINIMIZED     = NK_FLAG(15),
+    NK_WINDOW_MINIMIZED     = NK_FLAG(16),
     /* marks the window as minimized */
-    NK_WINDOW_REMOVE_ROM    = NK_FLAG(16)
+    NK_WINDOW_REMOVE_ROM    = NK_FLAG(17)
     /* Removes read only mode at the end of the window */
 };
 
@@ -15901,11 +15906,11 @@ nk_panel_begin(struct nk_context *ctx, const char *title, enum nk_panel_type pan
     layout->row.tree_depth = 0;
     layout->row.height = panel_padding.y;
     layout->has_scrolling = nk_true;
-    if (!(win->flags & NK_WINDOW_NO_SCROLLBAR))
+    if (!(win->flags & NK_WINDOW_NO_VSCROLLBAR))
         layout->bounds.w -= scrollbar_size.x;
     if (!nk_panel_is_nonblock(panel_type)) {
         layout->footer_height = 0;
-        if (!(win->flags & NK_WINDOW_NO_SCROLLBAR) || win->flags & NK_WINDOW_SCALABLE)
+        if (!(win->flags & NK_WINDOW_NO_HSCROLLBAR) || win->flags & NK_WINDOW_SCALABLE)
             layout->footer_height = scrollbar_size.y;
         layout->bounds.h -= layout->footer_height;
     }
@@ -16099,7 +16104,7 @@ nk_panel_end(struct nk_context *ctx)
         empty_space.y = layout->bounds.y;
         empty_space.w = panel_padding.x + layout->border;
         empty_space.h = layout->bounds.h;
-        if (*layout->offset_y == 0 && !(layout->flags & NK_WINDOW_NO_SCROLLBAR))
+        if (*layout->offset_y == 0 && !(layout->flags & NK_WINDOW_NO_VSCROLLBAR))
             empty_space.w += scrollbar_size.x;
         nk_fill_rect(out, empty_space, 0, style->window.background);
 
@@ -16114,7 +16119,10 @@ nk_panel_end(struct nk_context *ctx)
     }
 
     /* scrollbars */
-    if (!(layout->flags & NK_WINDOW_NO_SCROLLBAR) &&
+    if ((
+            !(layout->flags & NK_WINDOW_NO_VSCROLLBAR) ||
+            !(layout->flags & NK_WINDOW_NO_HSCROLLBAR)
+        ) &&
         !(layout->flags & NK_WINDOW_MINIMIZED) &&
         window->scrollbar_hiding_timer < NK_SCROLLBAR_HIDING_TIMEOUT)
     {
@@ -16162,7 +16170,7 @@ nk_panel_end(struct nk_context *ctx)
             else window->scrolled = nk_false;
         } else scroll_has_scrolling = nk_false;
 
-        {
+        if (!(layout->flags & NK_WINDOW_NO_VSCROLLBAR)) {
             /* vertical scrollbar */
             nk_flags state = 0;
             scroll.x = layout->bounds.x + layout->bounds.w + panel_padding.x;
@@ -16181,7 +16189,7 @@ nk_panel_end(struct nk_context *ctx)
             if (in && scroll_has_scrolling)
                 in->mouse.scroll_delta.y = 0;
         }
-        {
+        if (!(layout->flags & NK_WINDOW_NO_HSCROLLBAR)) {
             /* horizontal scrollbar */
             nk_flags state = 0;
             scroll.x = layout->bounds.x;
@@ -16235,7 +16243,7 @@ nk_panel_end(struct nk_context *ctx)
         if (layout->flags & NK_WINDOW_SCALE_LEFT)
             scaler.x = layout->bounds.x - panel_padding.x * 0.5f;
         else scaler.x = layout->bounds.x + layout->bounds.w + panel_padding.x;
-        if (layout->flags & NK_WINDOW_NO_SCROLLBAR)
+        if (layout->flags & NK_WINDOW_NO_VSCROLLBAR)
             scaler.x -= scaler.w;
 
         /* draw scaler */
@@ -18991,8 +18999,10 @@ nk_group_scrolled_end(struct nk_context *ctx)
         pan.bounds.w += 2*g->border;
         pan.bounds.h += 2*g->border;
     }
-    if (!(g->flags & NK_WINDOW_NO_SCROLLBAR)) {
+    if (!(g->flags & NK_WINDOW_NO_VSCROLLBAR)) {
         pan.bounds.w += ctx->style.window.scrollbar_size.x;
+    }
+    if (!(g->flags & NK_WINDOW_NO_HSCROLLBAR)) {
         pan.bounds.h += ctx->style.window.scrollbar_size.y;
     }
     pan.scrollbar.x = *g->offset_x;
