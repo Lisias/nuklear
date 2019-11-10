@@ -334,6 +334,7 @@ extern "C" {
  #define NK_UINT16 uint16_t
  #define NK_INT32 int32_t
  #define NK_UINT32 uint32_t
+ #define NK_UINT64 uint64_t
  #define NK_SIZE_TYPE uintptr_t
  #define NK_POINTER_TYPE uintptr_t
 #else
@@ -361,6 +362,13 @@ extern "C" {
       #define NK_UINT32 unsigned __int32
     #else
       #define NK_UINT32 unsigned int
+    #endif
+  #endif
+  #ifndef NK_UINT64
+    #if defined(_MSC_VER)
+      #define NK_UINT64 unsigned __int64
+    #else
+      #define NK_UINT64 unsigned long long
     #endif
   #endif
   #ifndef NK_SIZE_TYPE
@@ -402,6 +410,7 @@ typedef NK_INT16 nk_short;
 typedef NK_UINT16 nk_ushort;
 typedef NK_INT32 nk_int;
 typedef NK_UINT32 nk_uint;
+typedef NK_UINT64 nk_uint64;
 typedef NK_SIZE_TYPE nk_size;
 typedef NK_POINTER_TYPE nk_ptr;
 
@@ -415,6 +424,7 @@ typedef nk_uint nk_rune;
 NK_STATIC_ASSERT(sizeof(nk_short) == 2);
 NK_STATIC_ASSERT(sizeof(nk_ushort) == 2);
 NK_STATIC_ASSERT(sizeof(nk_uint) == 4);
+NK_STATIC_ASSERT(sizeof(nk_uint64) == 8);
 NK_STATIC_ASSERT(sizeof(nk_int) == 4);
 NK_STATIC_ASSERT(sizeof(nk_byte) == 1);
 NK_STATIC_ASSERT(sizeof(nk_flags) >= 4);
@@ -461,7 +471,7 @@ struct nk_vec2i {short x, y;};
 struct nk_rect {float x,y,w,h;};
 struct nk_recti {short x,y,w,h;};
 typedef char nk_glyph[NK_UTF_SIZE];
-typedef union {void *ptr; int id;} nk_handle;
+typedef union {nk_uint64 uid64; void *ptr; int id;} nk_handle;
 struct nk_image {nk_handle handle;unsigned short w,h;unsigned short region[4];};
 struct nk_nine_patch {nk_handle handle;unsigned short w,h;unsigned short region[4];unsigned short margin[4];};
 struct nk_cursor {struct nk_image img; struct nk_vec2 size, offset;};
