@@ -136,6 +136,8 @@ nk_do_color_picker(nk_flags *state,
     NK_ASSERT(font);
     if (!out || !col || !state || !font)
         return ret;
+    
+    int bars = (fmt == NK_RGBA) ? 2 : 1;
 
     bar_w = font->height;
     bounds.x += padding.x;
@@ -146,7 +148,7 @@ nk_do_color_picker(nk_flags *state,
     matrix.x = bounds.x;
     matrix.y = bounds.y;
     matrix.h = bounds.h;
-    matrix.w = bounds.w - (3 * padding.x + 2 * bar_w);
+    matrix.w = bounds.w - ((bars + 1) * padding.x + bars * bar_w);
 
     hue_bar.w = bar_w;
     hue_bar.y = bounds.y;
