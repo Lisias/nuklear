@@ -374,8 +374,11 @@ nk_panel_end(struct nk_context *ctx)
         empty_space.y = layout->bounds.y;
         empty_space.w = panel_padding.x + layout->border;
         empty_space.h = layout->bounds.h;
+        /* new vscrollbar style for panels paints the scrollbar on top of content
+        / so no need to add extra space
         if (*layout->offset_y == 0 && !(layout->flags & NK_WINDOW_NO_VSCROLLBAR))
             empty_space.w += scrollbar_size.x;
+        */
         nk_fill_rect(out, empty_space, 0, style->window.background);
 
         /* fill bottom empty space */
