@@ -20382,7 +20382,7 @@ NK_LIB void
 nk_draw_button_text_image(struct nk_command_buffer *out,
     const struct nk_rect *bounds, const struct nk_rect *label,
     const struct nk_rect *image, nk_flags state, const struct nk_style_button *style,
-    const char *str, int len, const struct nk_user_font *font,
+    const char *str, int len, nk_flags align, const struct nk_user_font *font,
     const struct nk_image *img)
 {
     struct nk_text text;
@@ -20400,7 +20400,7 @@ nk_draw_button_text_image(struct nk_command_buffer *out,
     else text.text = style->text_normal;
 
     text.padding = nk_vec2(0,0);
-    nk_widget_text(out, *label, str, len, &text, NK_TEXT_CENTERED, font);
+    nk_widget_text(out, *label, str, len, &text, align, font);
     nk_draw_image(out, *image, img, nk_white);
 }
 NK_LIB int
@@ -20424,18 +20424,24 @@ nk_do_button_text_image(nk_flags *state,
     ret = nk_do_button(state, out, bounds, style, in, behavior, &content);
     icon.y = bounds.y + style->padding.y;
     icon.w = icon.h = bounds.h - 2 * style->padding.y;
-    if (align & NK_TEXT_ALIGN_LEFT) {
+    if (align & NK_TEXT_ALIGN_RIGHT) {
         icon.x = (bounds.x + bounds.w) - (2 * style->padding.x + icon.w);
         icon.x = NK_MAX(icon.x, 0);
-    } else icon.x = bounds.x + 2 * style->padding.x;
+    } else {
+        icon.x = bounds.x + 2 * style->padding.x;
+    }
 
     icon.x += style->image_padding.x;
     icon.y += style->image_padding.y;
     icon.w -= 2 * style->image_padding.x;
     icon.h -= 2 * style->image_padding.y;
+    content.w -= icon.w;
+    if (align & NK_TEXT_ALIGN_LEFT) {
+        content.x += icon.w + 2 * style->padding.x;
+    }
 
     if (style->draw_begin) style->draw_begin(out, style->userdata);
-    nk_draw_button_text_image(out, &bounds, &content, &icon, *state, style, str, len, font, &img);
+    nk_draw_button_text_image(out, &bounds, &content, &icon, *state, style, str, len, align, font, &img);
     if (style->draw_end) style->draw_end(out, style->userdata);
     return ret;
 }
