@@ -412,7 +412,13 @@ nk_draw_image(struct nk_command_buffer *b, struct nk_rect r,
     cmd->w = (unsigned short)NK_MAX(0, r.w);
     cmd->h = (unsigned short)NK_MAX(0, r.h);
     cmd->img = *img;
-    cmd->col = col;
+    if (col.r != 255 || col.g != 255 || col.b != 255 || col.a != 255)
+        cmd->col = col;
+    else
+        if (img->color.r != 0 || img->color.g != 0 || img->color.b != 0 || img->color.a != 0)
+            cmd->col = img->color;
+        else
+            cmd->col = nk_white;
 }
 
 NK_API void

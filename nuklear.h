@@ -472,7 +472,7 @@ struct nk_rect {float x,y,w,h;};
 struct nk_recti {short x,y,w,h;};
 typedef char nk_glyph[NK_UTF_SIZE];
 typedef union {nk_uint64 uid64; void *ptr; int id;} nk_handle;
-struct nk_image {nk_handle handle;unsigned short w,h;unsigned short region[4];};
+struct nk_image {nk_handle handle;unsigned short w,h;unsigned short region[4]; nk_color color;};
 struct nk_nine_patch {nk_handle handle;unsigned short w,h;unsigned short region[4];unsigned short margin[4];};
 struct nk_cursor {struct nk_image img; struct nk_vec2 size, offset;};
 struct nk_scroll {nk_uint x, y;};
@@ -9182,7 +9182,13 @@ nk_draw_image(struct nk_command_buffer *b, struct nk_rect r,
     cmd->w = (unsigned short)NK_MAX(0, r.w);
     cmd->h = (unsigned short)NK_MAX(0, r.h);
     cmd->img = *img;
-    cmd->col = col;
+    if (col.r != 255 || col.g != 255 || col.b != 255 || col.a != 255)
+        cmd->col = col;
+    else
+        if (img->color.r != 0 || img->color.g != 0 || img->color.b != 0 || img->color.a != 0)
+            cmd->col = img->color;
+        else
+            cmd->col = nk_white;
 }
 
 NK_API void
