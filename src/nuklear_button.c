@@ -359,6 +359,7 @@ nk_do_button_text_image(nk_flags *state,
     int ret;
     struct nk_rect icon;
     struct nk_rect content;
+    float text_width;
 
     NK_ASSERT(style);
     NK_ASSERT(state);
@@ -373,7 +374,12 @@ nk_do_button_text_image(nk_flags *state,
     if (align & NK_TEXT_ALIGN_RIGHT) {
         icon.x = (bounds.x + bounds.w) - (2 * style->padding.x + icon.w);
         icon.x = NK_MAX(icon.x, 0);
-    } else {
+    }
+    else if (align & NK_TEXT_ALIGN_CENTERED) {
+        text_width = font->width(font->userdata, font->height, str, len);
+        icon.x = bounds.x + bounds.w / 2 - text_width / 2 - icon.w / 2;
+    }
+    else {
         icon.x = bounds.x + 2 * style->padding.x;
     }
 
@@ -381,9 +387,12 @@ nk_do_button_text_image(nk_flags *state,
     icon.y += style->image_padding.y;
     icon.w -= 2 * style->image_padding.x;
     icon.h -= 2 * style->image_padding.y;
-    content.w -= icon.w;
+    content.w -= icon.w + 2 * style->padding.x;
     if (align & NK_TEXT_ALIGN_LEFT) {
         content.x += icon.w + 2 * style->padding.x;
+    }
+    else if (align & NK_TEXT_ALIGN_CENTERED) {
+        content.x += icon.w + style->padding.x;
     }
 
     if (style->draw_begin) style->draw_begin(out, style->userdata);
