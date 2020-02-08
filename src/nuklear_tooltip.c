@@ -14,12 +14,18 @@ nk_tooltip_begin(struct nk_context *ctx, float width)
     const struct nk_input *in;
     struct nk_rect bounds;
     int ret;
+    const struct nk_style *style;
+    struct nk_vec2 offset;
 
     NK_ASSERT(ctx);
     NK_ASSERT(ctx->current);
     NK_ASSERT(ctx->current->layout);
     if (!ctx || !ctx->current || !ctx->current->layout)
         return 0;
+
+    /* fetch configuration data */
+    style = &ctx->style;
+    offset = style->window.tooltip_offset;
 
     /* make sure that no nonblocking popup is currently active */
     win = ctx->current;
@@ -29,8 +35,8 @@ nk_tooltip_begin(struct nk_context *ctx, float width)
 
     w = nk_iceilf(width);
     h = nk_iceilf(nk_null_rect.h);
-    x = nk_ifloorf(in->mouse.pos.x + 1) - (int)win->layout->clip.x;
-    y = nk_ifloorf(in->mouse.pos.y + 1) - (int)win->layout->clip.y;
+    x = nk_ifloorf(in->mouse.pos.x + offset.x) - (int)win->layout->clip.x;
+    y = nk_ifloorf(in->mouse.pos.y + offset.y) - (int)win->layout->clip.y;
 
     bounds.x = (float)x;
     bounds.y = (float)y;

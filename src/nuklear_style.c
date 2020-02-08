@@ -629,6 +629,7 @@ nk_style_from_table(struct nk_context *ctx, const struct nk_color *table)
     win->contextual_padding = nk_vec2(4,4);
     win->menu_padding = nk_vec2(4,4);
     win->tooltip_padding = nk_vec2(4,4);
+    win->tooltip_offset = nk_vec2(1,1);
 }
 NK_API void
 nk_style_set_font(struct nk_context *ctx, const struct nk_user_font *font)

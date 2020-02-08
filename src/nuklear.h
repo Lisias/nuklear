@@ -5030,6 +5030,7 @@ struct nk_style_window {
     struct nk_vec2 contextual_padding;
     struct nk_vec2 menu_padding;
     struct nk_vec2 tooltip_padding;
+    struct nk_vec2 tooltip_offset;
 };
 
 struct nk_style {
