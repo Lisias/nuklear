@@ -5620,6 +5620,7 @@ struct nk_context {
     enum nk_button_behavior button_behavior;
     struct nk_configuration_stacks stacks;
     float delta_time_seconds;
+    struct nk_rect popup_screen_bounds;
 
 /* private:
     should only be accessed if you
@@ -25761,6 +25762,7 @@ NK_API int
 nk_tooltip_begin(struct nk_context *ctx, float width)
 {
     int x,y,w,h;
+    float sx;
     struct nk_window *win;
     const struct nk_input *in;
     struct nk_rect bounds;
@@ -25787,6 +25789,10 @@ nk_tooltip_begin(struct nk_context *ctx, float width)
     w = nk_iceilf(width);
     h = nk_iceilf(nk_null_rect.h);
     x = nk_ifloorf(in->mouse.pos.x + offset.x) - (int)win->layout->clip.x;
+    sx = (float)x + win->layout->clip.x;
+    if (ctx->popup_screen_bounds.w > 0.0f && (sx + (float)w) >= (ctx->popup_screen_bounds.x + ctx->popup_screen_bounds.w)) {
+        x = nk_ifloorf(in->mouse.pos.x + 1) - (int)win->layout->clip.x - w;
+    }
     y = nk_ifloorf(in->mouse.pos.y + offset.y) - (int)win->layout->clip.y;
 
     bounds.x = (float)x;
