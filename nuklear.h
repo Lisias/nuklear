@@ -25762,7 +25762,7 @@ NK_API int
 nk_tooltip_begin(struct nk_context *ctx, float width)
 {
     int x,y,w,h;
-    float sx;
+    float sx,sy;
     struct nk_window *win;
     const struct nk_input *in;
     struct nk_rect bounds;
@@ -25788,12 +25788,26 @@ nk_tooltip_begin(struct nk_context *ctx, float width)
 
     w = nk_iceilf(width);
     h = nk_iceilf(nk_null_rect.h);
-    x = nk_ifloorf(in->mouse.pos.x + offset.x) - (int)win->layout->clip.x;
-    sx = (float)x + win->layout->clip.x;
-    if (ctx->popup_screen_bounds.w > 0.0f && (sx + (float)w) >= (ctx->popup_screen_bounds.x + ctx->popup_screen_bounds.w)) {
-        x = nk_ifloorf(in->mouse.pos.x + 1) - (int)win->layout->clip.x - w;
+    sx = in->mouse.pos.x + offset.x;
+    sy = in->mouse.pos.y + offset.y;
+    if (ctx->popup_screen_bounds.w > 0.0f && ctx->popup_screen_bounds.h > 0.0f) {
+        if (sx < ctx->popup_screen_bounds.x) {
+            sx = ctx->popup_screen_bounds.x;
+        }
+        else if ((sx + (float)w) >= (ctx->popup_screen_bounds.x + ctx->popup_screen_bounds.w)) {
+            sx = ctx->popup_screen_bounds.x + ctx->popup_screen_bounds.w - (float)w;
+        }
+        if (sy < ctx->popup_screen_bounds.y) {
+            sy = ctx->popup_screen_bounds.y;
+        }
+        /* h is unknown here, so hardcode some value that is OK for single text line tooltips... */
+        else if ((sy + 50.0f) >= (ctx->popup_screen_bounds.y + ctx->popup_screen_bounds.h)) {
+            sy = ctx->popup_screen_bounds.y + ctx->popup_screen_bounds.h - 50.0f;
+        }
     }
-    y = nk_ifloorf(in->mouse.pos.y + offset.y) - (int)win->layout->clip.y;
+    
+    x = nk_ifloorf(sx) - (int)win->layout->clip.x;
+    y = nk_ifloorf(sy) - (int)win->layout->clip.y;
 
     bounds.x = (float)x;
     bounds.y = (float)y;
