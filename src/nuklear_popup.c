@@ -118,6 +118,34 @@ nk_nonblock_begin(struct nk_context *ctx,
     if (!ctx || !ctx->current || !ctx->current->layout)
         return 0;
 
+    // clip/move if out of screen
+    if (ctx->current->popup.win && ctx->current->popup.win->layout) {
+        float sx = body.x;
+        float sy = body.y;
+        float w = body.w;
+        float h = body.h;
+
+        if (ctx->popup_screen_bounds.w > 0.0f && ctx->popup_screen_bounds.h > 0.0f) {
+            if (sx < ctx->popup_screen_bounds.x) {
+                sx = ctx->popup_screen_bounds.x;
+            }
+            else if ((sx + w) >= (ctx->popup_screen_bounds.x + ctx->popup_screen_bounds.w)) {
+                sx = ctx->popup_screen_bounds.x + ctx->popup_screen_bounds.w - w;
+            }
+            if (sy < ctx->popup_screen_bounds.y) {
+                sy = ctx->popup_screen_bounds.y;
+            }
+            // real h is impossible to determine, so instead make it shorter
+            else if ((sy + h) >= (ctx->popup_screen_bounds.y + ctx->popup_screen_bounds.h)) {
+                h = NK_MAX(50.0f, (ctx->popup_screen_bounds.y + ctx->popup_screen_bounds.h) - sy);
+            }
+        }
+
+        body.x = sx;
+        body.y = sy;
+        body.h = h;
+    }
+
     /* popups cannot have popups */
     win = ctx->current;
     panel = win->layout;
@@ -227,6 +255,7 @@ nk_popup_end(struct nk_context *ctx)
     win->buffer = popup->buffer;
     nk_finish_popup(ctx, win);
     ctx->current = win;
+
     nk_push_scissor(&win->buffer, win->layout->clip);
 }
 NK_API void
