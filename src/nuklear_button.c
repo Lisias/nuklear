@@ -249,10 +249,23 @@ nk_do_button_image(nk_flags *state,
         return nk_false;
 
     ret = nk_do_button(state, out, bounds, style, in, b, &content);
-    content.x += style->image_padding.x;
-    content.y += style->image_padding.y;
     content.w -= 2 * style->image_padding.x;
     content.h -= 2 * style->image_padding.y;
+    content.x += style->image_padding.x;
+    content.y += style->image_padding.y;
+    if (img.region[2] > 0 && content.w > 0.0f && img.region[3] > 0 && content.h > 0.0f) {
+        float img_w = (float)img.region[2];
+        float img_h = (float)img.region[3];
+        float w_ratio = content.w / img_w;
+        float h_ratio = content.h / img_h;
+        float scale = NK_MIN(w_ratio, h_ratio);
+        float w = img_w * scale;
+        float h = img_h * scale;
+        content.x += (content.w - w) / 2.0f;
+        content.y += (content.h - h) / 2.0f;
+        content.w = w;
+        content.h = h;
+    }
 
     if (style->draw_begin) style->draw_begin(out, style->userdata);
     nk_draw_button_image(out, &bounds, &content, *state, style, &img);
