@@ -373,6 +373,7 @@ nk_do_button_text_image(nk_flags *state,
     struct nk_rect icon;
     struct nk_rect content;
     float text_width;
+    int vertical;
 
     NK_ASSERT(style);
     NK_ASSERT(state);
@@ -381,31 +382,52 @@ nk_do_button_text_image(nk_flags *state,
     if (!out || !font || !style || !str)
         return nk_false;
 
+    if ((align & NK_TEXT_ALIGN_BOTTOM) || (align & NK_TEXT_ALIGN_TOP)) {
+        icon.w = icon.h = bounds.h - 2 * style->padding.x - font->height;
+        vertical = 1;
+    }
+    else {
+        icon.w = icon.h = bounds.h - 2 * style->padding.y;
+        vertical = 0;
+    }
+
     ret = nk_do_button(state, out, bounds, style, in, behavior, &content);
-    icon.y = bounds.y + style->padding.y;
-    icon.w = icon.h = bounds.h - 2 * style->padding.y;
+
     if (align & NK_TEXT_ALIGN_RIGHT) {
         icon.x = (bounds.x + bounds.w) - (2 * style->padding.x + icon.w);
         icon.x = NK_MAX(icon.x, 0);
     }
     else if (align & NK_TEXT_ALIGN_CENTERED) {
-        text_width = font->width(font->userdata, font->height, str, len);
-        icon.x = bounds.x + bounds.w / 2 - text_width / 2 - icon.w / 2;
+        if (vertical) {
+            icon.x = bounds.x + bounds.w / 2 - icon.w / 2;
+        }
+        else {
+            text_width = font->width(font->userdata, font->height, str, len);
+            icon.x = bounds.x + bounds.w / 2 - text_width / 2 - icon.w / 2;
+        }
     }
     else {
         icon.x = bounds.x + 2 * style->padding.x;
     }
+    icon.y = bounds.y + style->padding.y;
 
     icon.x += style->image_padding.x;
     icon.y += style->image_padding.y;
     icon.w -= 2 * style->image_padding.x;
     icon.h -= 2 * style->image_padding.y;
-    content.w -= icon.w + 2 * style->padding.x;
-    if (align & NK_TEXT_ALIGN_LEFT) {
-        content.x += icon.w + 2 * style->padding.x;
+    if (vertical) {
+        content.h -= icon.h + 2 * style->padding.y;
+        content.x += style->padding.x;
+        content.y += icon.h + 2 * style->padding.y;
     }
-    else if (align & NK_TEXT_ALIGN_CENTERED) {
-        content.x += icon.w + style->padding.x;
+    else {
+        content.w -= icon.w + 2 * style->padding.x;
+        if (align & NK_TEXT_ALIGN_LEFT) {
+            content.x += icon.w + 2 * style->padding.x;
+        }
+        else if (align & NK_TEXT_ALIGN_CENTERED) {
+            content.x += icon.w + style->padding.x;
+        }
     }
 
     if (style->draw_begin) style->draw_begin(out, style->userdata);
