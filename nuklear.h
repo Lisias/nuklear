@@ -5212,6 +5212,8 @@ struct nk_style_window_header {
     struct nk_vec2 padding;
     struct nk_vec2 label_padding;
     struct nk_vec2 spacing;
+    struct nk_vec2 button_offset;
+    struct nk_vec2 button_size_delta;
 };
 
 struct nk_style_window {
@@ -14969,6 +14971,8 @@ nk_style_from_table(struct nk_context *ctx, const struct nk_color *table)
     win->header.label_padding = nk_vec2(4,4);
     win->header.padding = nk_vec2(4,4);
     win->header.spacing = nk_vec2(0,0);
+    win->header.button_offset = nk_vec2(0,0);
+    win->header.button_size_delta = nk_vec2(0,0);
 
     /* window header close button */
     button = &style->window.header.close_button;
@@ -15982,9 +15986,9 @@ nk_panel_begin(struct nk_context *ctx, const char *title, enum nk_panel_type pan
 
         /* window close button */
         {struct nk_rect button;
-        button.y = header.y + style->window.header.padding.y;
-        button.h = header.h - 2 * style->window.header.padding.y;
-        button.w = button.h;
+        button.y = header.y + style->window.header.padding.y + style->window.header.button_offset.y;
+        button.h = header.h - 2 * style->window.header.padding.y + style->window.header.button_size_delta.y;
+        button.w = button.h + style->window.header.button_size_delta.x;
         if (win->flags & NK_WINDOW_CLOSABLE) {
             nk_flags ws = 0;
             if (style->window.header.align == NK_HEADER_RIGHT) {
@@ -15994,6 +15998,7 @@ nk_panel_begin(struct nk_context *ctx, const char *title, enum nk_panel_type pan
                 button.x = header.x + style->window.header.padding.x;
                 header.x += button.w + style->window.header.spacing.x + style->window.header.padding.x;
             }
+            button.x += style->window.header.button_offset.x;
 
             if (nk_do_button_symbol(&ws, &win->buffer, button,
                 style->window.header.close_symbol, NK_BUTTON_DEFAULT,
@@ -16018,6 +16023,7 @@ nk_panel_begin(struct nk_context *ctx, const char *title, enum nk_panel_type pan
                 button.x = header.x;
                 header.x += button.w + style->window.header.spacing.x + style->window.header.padding.x;
             }
+            button.x += style->window.header.button_offset.x;
             if (nk_do_button_symbol(&ws, &win->buffer, button, (layout->flags & NK_WINDOW_MINIMIZED)?
                 style->window.header.maximize_symbol: style->window.header.minimize_symbol,
                 NK_BUTTON_DEFAULT, &style->window.header.minimize_button, in, style->font) && !(win->flags & NK_WINDOW_ROM))

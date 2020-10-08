@@ -230,9 +230,9 @@ nk_panel_begin(struct nk_context *ctx, const char *title, enum nk_panel_type pan
 
         /* window close button */
         {struct nk_rect button;
-        button.y = header.y + style->window.header.padding.y;
-        button.h = header.h - 2 * style->window.header.padding.y;
-        button.w = button.h;
+        button.y = header.y + style->window.header.padding.y + style->window.header.button_offset.y;
+        button.h = header.h - 2 * style->window.header.padding.y + style->window.header.button_size_delta.y;
+        button.w = button.h + style->window.header.button_size_delta.x;
         if (win->flags & NK_WINDOW_CLOSABLE) {
             nk_flags ws = 0;
             if (style->window.header.align == NK_HEADER_RIGHT) {
@@ -242,6 +242,7 @@ nk_panel_begin(struct nk_context *ctx, const char *title, enum nk_panel_type pan
                 button.x = header.x + style->window.header.padding.x;
                 header.x += button.w + style->window.header.spacing.x + style->window.header.padding.x;
             }
+            button.x += style->window.header.button_offset.x;
 
             if (nk_do_button_symbol(&ws, &win->buffer, button,
                 style->window.header.close_symbol, NK_BUTTON_DEFAULT,
@@ -266,6 +267,7 @@ nk_panel_begin(struct nk_context *ctx, const char *title, enum nk_panel_type pan
                 button.x = header.x;
                 header.x += button.w + style->window.header.spacing.x + style->window.header.padding.x;
             }
+            button.x += style->window.header.button_offset.x;
             if (nk_do_button_symbol(&ws, &win->buffer, button, (layout->flags & NK_WINDOW_MINIMIZED)?
                 style->window.header.maximize_symbol: style->window.header.minimize_symbol,
                 NK_BUTTON_DEFAULT, &style->window.header.minimize_button, in, style->font) && !(win->flags & NK_WINDOW_ROM))

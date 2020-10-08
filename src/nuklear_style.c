@@ -555,6 +555,8 @@ nk_style_from_table(struct nk_context *ctx, const struct nk_color *table)
     win->header.label_padding = nk_vec2(4,4);
     win->header.padding = nk_vec2(4,4);
     win->header.spacing = nk_vec2(0,0);
+    win->header.button_offset = nk_vec2(0,0);
+    win->header.button_size_delta = nk_vec2(0,0);
 
     /* window header close button */
     button = &style->window.header.close_button;

@@ -4993,6 +4993,8 @@ struct nk_style_window_header {
     struct nk_vec2 padding;
     struct nk_vec2 label_padding;
     struct nk_vec2 spacing;
+    struct nk_vec2 button_offset;
+    struct nk_vec2 button_size_delta;
 };
 
 struct nk_style_window {
