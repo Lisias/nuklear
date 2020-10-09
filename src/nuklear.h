@@ -4662,6 +4662,7 @@ struct nk_style_button {
     /* properties */
     float border;
     float rounding;
+    float symbol_thickness;
     struct nk_vec2 padding;
     struct nk_vec2 image_padding;
     struct nk_vec2 touch_padding;

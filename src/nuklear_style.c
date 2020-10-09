@@ -134,6 +134,7 @@ nk_style_from_table(struct nk_context *ctx, const struct nk_color *table)
     button->rounding        = 4.0f;
     button->draw_begin      = 0;
     button->draw_end        = 0;
+    button->symbol_thickness = 1.0f;
 
     /* contextual button */
     button = &style->contextual_button;

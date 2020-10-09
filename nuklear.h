@@ -4881,6 +4881,7 @@ struct nk_style_button {
     /* properties */
     float border;
     float rounding;
+    float symbol_thickness;
     struct nk_vec2 padding;
     struct nk_vec2 image_padding;
     struct nk_vec2 touch_padding;
@@ -14550,6 +14551,7 @@ nk_style_from_table(struct nk_context *ctx, const struct nk_color *table)
     button->rounding        = 4.0f;
     button->draw_begin      = 0;
     button->draw_end        = 0;
+    button->symbol_thickness = 1.0f;
 
     /* contextual button */
     button = &style->contextual_button;
@@ -20104,7 +20106,17 @@ nk_draw_symbol(struct nk_command_buffer *out, enum nk_symbol_type type,
     float border_width, const struct nk_user_font *font)
 {
     switch (type) {
-    case NK_SYMBOL_X:
+    case NK_SYMBOL_X: {
+        float pad = border_width / 3.0f;
+        nk_stroke_line(out,
+            content.x + pad, content.y + pad,
+            content.x + content.w - pad, content.y + content.h - pad,
+            border_width, foreground);
+        nk_stroke_line(out,
+            content.x + content.w - pad, content.y + pad,
+            content.x + pad, content.y + content.h - pad,
+            border_width, foreground);
+    } break;
     case NK_SYMBOL_UNDERSCORE:
     case NK_SYMBOL_PLUS:
     case NK_SYMBOL_MINUS: {
@@ -20292,7 +20304,7 @@ nk_draw_button_symbol(struct nk_command_buffer *out,
     else if (state & NK_WIDGET_STATE_ACTIVED)
         sym = style->text_active;
     else sym = style->text_normal;
-    nk_draw_symbol(out, type, *content, bg, sym, 1, font);
+    nk_draw_symbol(out, type, *content, bg, sym, style->symbol_thickness, font);
 }
 NK_LIB int
 nk_do_button_symbol(nk_flags *state,
@@ -20394,7 +20406,7 @@ nk_draw_button_text_symbol(struct nk_command_buffer *out,
     }
 
     text.padding = nk_vec2(0,0);
-    nk_draw_symbol(out, type, *symbol, style->text_background, sym, 0, font);
+    nk_draw_symbol(out, type, *symbol, style->text_background, sym, style->symbol_thickness, font);
     nk_widget_text(out, *label, str, len, &text, NK_TEXT_CENTERED, font);
 }
 NK_LIB int
