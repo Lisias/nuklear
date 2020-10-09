@@ -16568,8 +16568,12 @@ nk_begin_titled(struct nk_context *ctx, const char *name, const char *title,
         /* update window */
         win->flags &= ~(nk_flags)(NK_WINDOW_PRIVATE-1);
         win->flags |= flags;
-        if (!(win->flags & (NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE)))
+        if (!(win->flags & (NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE))) {
             win->bounds = bounds;
+        } else {
+            win->bounds.w = NK_MAX(win->bounds.w, bounds.w);
+            win->bounds.h = NK_MAX(win->bounds.h, bounds.h);
+        }
         /* If this assert triggers you either:
          *
          * I.) Have more than one window with the same name or
