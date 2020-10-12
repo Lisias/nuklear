@@ -1,3 +1,4 @@
+#include <math.h>
 #include "nuklear.h"
 #include "nuklear_internal.h"
 
@@ -28,10 +29,10 @@ nk_subimage_ptr(void *ptr, unsigned short w, unsigned short h, struct nk_rect r)
     nk_zero(&s, sizeof(s));
     s.handle.ptr = ptr;
     s.w = w; s.h = h;
-    s.region[0] = (unsigned short)r.x;
-    s.region[1] = (unsigned short)r.y;
-    s.region[2] = (unsigned short)r.w;
-    s.region[3] = (unsigned short)r.h;
+    s.region[0] = (unsigned short)floorf(r.x + 0.5f);
+    s.region[1] = (unsigned short)floorf(r.y + 0.5f);
+    s.region[2] = (unsigned short)floorf(r.w + 0.5f);
+    s.region[3] = (unsigned short)floorf(r.h + 0.5f);
     return s;
 }
 NK_API struct nk_image
@@ -41,10 +42,10 @@ nk_subimage_id(int id, unsigned short w, unsigned short h, struct nk_rect r)
     nk_zero(&s, sizeof(s));
     s.handle.id = id;
     s.w = w; s.h = h;
-    s.region[0] = (unsigned short)r.x;
-    s.region[1] = (unsigned short)r.y;
-    s.region[2] = (unsigned short)r.w;
-    s.region[3] = (unsigned short)r.h;
+    s.region[0] = (unsigned short)floorf(r.x + 0.5f);
+    s.region[1] = (unsigned short)floorf(r.y + 0.5f);
+    s.region[2] = (unsigned short)floorf(r.w + 0.5f);
+    s.region[3] = (unsigned short)floorf(r.h + 0.5f);
     return s;
 }
 NK_API struct nk_image
@@ -55,10 +56,10 @@ nk_subimage_handle(nk_handle handle, unsigned short w, unsigned short h,
     nk_zero(&s, sizeof(s));
     s.handle = handle;
     s.w = w; s.h = h;
-    s.region[0] = (unsigned short)r.x;
-    s.region[1] = (unsigned short)r.y;
-    s.region[2] = (unsigned short)r.w;
-    s.region[3] = (unsigned short)r.h;
+    s.region[0] = (unsigned short)floorf(r.x + 0.5f);
+    s.region[1] = (unsigned short)floorf(r.y + 0.5f);
+    s.region[2] = (unsigned short)floorf(r.w + 0.5f);
+    s.region[3] = (unsigned short)floorf(r.h + 0.5f);
     return s;
 }
 NK_API struct nk_image
@@ -209,10 +210,10 @@ nk_sub_nine_patch_ptr(void *ptr, unsigned short w, unsigned short h, struct nk_r
     nk_zero(&s, sizeof(s));
     s.handle.ptr = ptr;
     s.w = w; s.h = h;
-    s.region[0] = (unsigned short)r.x;
-    s.region[1] = (unsigned short)r.y;
-    s.region[2] = (unsigned short)r.w;
-    s.region[3] = (unsigned short)r.h;
+    s.region[0] = (unsigned short)floorf(r.x + 0.5f);
+    s.region[1] = (unsigned short)floorf(r.y + 0.5f);
+    s.region[2] = (unsigned short)floorf(r.w + 0.5f);
+    s.region[3] = (unsigned short)floorf(r.h + 0.5f);
     s.margin[0] = l;
     s.margin[1] = t;
     s.margin[2] = ri;
@@ -227,10 +228,10 @@ nk_sub_nine_patch_id(int id, unsigned short w, unsigned short h, struct nk_rect 
     nk_zero(&s, sizeof(s));
     s.handle.id = id;
     s.w = w; s.h = h;
-    s.region[0] = (unsigned short)r.x;
-    s.region[1] = (unsigned short)r.y;
-    s.region[2] = (unsigned short)r.w;
-    s.region[3] = (unsigned short)r.h;
+    s.region[0] = (unsigned short)floorf(r.x + 0.5f);
+    s.region[1] = (unsigned short)floorf(r.y + 0.5f);
+    s.region[2] = (unsigned short)floorf(r.w + 0.5f);
+    s.region[3] = (unsigned short)floorf(r.h + 0.5f);
     s.margin[0] = l;
     s.margin[1] = t;
     s.margin[2] = ri;
@@ -245,10 +246,10 @@ nk_sub_nine_patch_handle(nk_handle handle, unsigned short w, unsigned short h, s
     nk_zero(&s, sizeof(s));
     s.handle = handle;
     s.w = w; s.h = h;
-    s.region[0] = (unsigned short)r.x;
-    s.region[1] = (unsigned short)r.y;
-    s.region[2] = (unsigned short)r.w;
-    s.region[3] = (unsigned short)r.h;
+    s.region[0] = (unsigned short)floorf(r.x + 0.5f);
+    s.region[1] = (unsigned short)floorf(r.y + 0.5f);
+    s.region[2] = (unsigned short)floorf(r.w + 0.5f);
+    s.region[3] = (unsigned short)floorf(r.h + 0.5f);
     s.margin[0] = l;
     s.margin[1] = t;
     s.margin[2] = ri;
