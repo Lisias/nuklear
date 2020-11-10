@@ -1280,10 +1280,10 @@ nk_draw_list_add_text(struct nk_draw_list *list, const struct nk_user_font *font
 {
     float x = 0;
     int text_len = 0;
+    nk_rune prev = 0;
     nk_rune unicode = 0;
-    nk_rune next = 0;
+    int prev_glyph_len = 0;
     int glyph_len = 0;
-    int next_glyph_len = 0;
     struct nk_user_font_glyph g;
 
     NK_ASSERT(list);
@@ -1293,20 +1293,22 @@ nk_draw_list_add_text(struct nk_draw_list *list, const struct nk_user_font *font
 
     nk_draw_list_push_image(list, font->texture);
     x = rect.x;
-    glyph_len = nk_utf_decode(text, &unicode, len);
-    if (!glyph_len) return;
 
     /* draw every glyph image */
     fg.a = (nk_byte)((float)fg.a * list->config.global_alpha);
-    while (text_len < len && glyph_len) {
+    while (text_len < len) {
         float gx, gy, gh, gw;
         float char_width = 0;
+
+        glyph_len = nk_utf_decode(text + text_len, &unicode, len);
+        if (!glyph_len) break;
         if (unicode == NK_UTF_INVALID) break;
 
         /* query currently drawn glyph information */
-        next_glyph_len = nk_utf_decode(text + text_len + glyph_len, &next, (int)len - text_len);
-        font->query(font->userdata, font_height, &g, unicode,
-                    (next == NK_UTF_INVALID) ? '\0' : next);
+        font->query(font->userdata, font_height, &g, prev, unicode);
+
+        prev_glyph_len = glyph_len;
+        prev = unicode;
 
         /* calculate and draw glyph drawing rectangle and image */
         gx = x + g.offset.x;
@@ -1319,8 +1321,6 @@ nk_draw_list_add_text(struct nk_draw_list *list, const struct nk_user_font *font
         /* offset next glyph */
         text_len += glyph_len;
         x += char_width;
-        glyph_len = next_glyph_len;
-        unicode = next;
     }
 }
 NK_API nk_flags

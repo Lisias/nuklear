@@ -2486,14 +2486,14 @@ nk_font_text_width(nk_handle handle, float height, const char *text, int len)
 #ifdef NK_INCLUDE_VERTEX_BUFFER_OUTPUT
 NK_INTERN void
 nk_font_query_font_glyph(nk_handle handle, float height,
-    struct nk_user_font_glyph *glyph, nk_rune codepoint, nk_rune next_codepoint)
+    struct nk_user_font_glyph *glyph, nk_rune prev_codepoint, nk_rune codepoint)
 {
     float scale;
     const struct nk_font_glyph *g;
     struct nk_font *font;
 
     NK_ASSERT(glyph);
-    NK_UNUSED(next_codepoint);
+    NK_UNUSED(prev_codepoint);
 
     font = (struct nk_font*)handle.ptr;
     NK_ASSERT(font);
