@@ -16570,6 +16570,9 @@ nk_begin_titled(struct nk_context *ctx, const char *name, const char *title,
         win->flags |= flags;
         if (!(win->flags & (NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE))) {
             win->bounds = bounds;
+        } else if ((win->flags & NK_WINDOW_MOVABLE) && !(win->flags & NK_WINDOW_SCALABLE)) {
+            win->bounds.w = bounds.w;
+            win->bounds.h = bounds.h;
         } else {
             win->bounds.w = NK_MAX(win->bounds.w, bounds.w);
             win->bounds.h = NK_MAX(win->bounds.h, bounds.h);
