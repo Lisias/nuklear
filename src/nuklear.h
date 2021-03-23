@@ -15,7 +15,7 @@ extern "C" {
 #define NK_UTF_INVALID 0xFFFD /* internal invalid utf8 rune */
 #define NK_UTF_SIZE 4 /* describes the number of bytes a glyph consists of*/
 #ifndef NK_INPUT_MAX
-  #define NK_INPUT_MAX 16
+  #define NK_INPUT_MAX 256
 #endif
 #ifndef NK_MAX_NUMBER_BUFFER
   #define NK_MAX_NUMBER_BUFFER 64
