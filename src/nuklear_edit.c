@@ -541,6 +541,30 @@ nk_do_edit(nk_flags *state, struct nk_command_buffer *out,
         else background_color = background->data.color;
 
 
+        /* cursor */
+        if (edit->select_start == edit->select_end)
+        {
+            if (edit->cursor >= nk_str_len(&edit->string) ||
+                (cursor_ptr && *cursor_ptr == '\n')) {
+                /* draw cursor at end of line */
+                struct nk_rect cursor;
+                cursor.w = style->cursor_size;
+                cursor.h = font->height;
+                cursor.x = area.x + cursor_pos.x - edit->scrollbar.x;
+                cursor.y = area.y + cursor_pos.y + row_height/2.0f - cursor.h/2.0f;
+                cursor.y -= edit->scrollbar.y;
+                nk_fill_rect(out, cursor, 0, cursor_color);
+            } else {
+                /* draw cursor inside text */
+                struct nk_rect cursor;
+                cursor.w = style->cursor_size;
+                cursor.h = row_height;
+                cursor.x = area.x + cursor_pos.x - edit->scrollbar.x;
+                cursor.y = area.y + cursor_pos.y - edit->scrollbar.y;
+                nk_fill_rect(out, cursor, 0, cursor_color);
+            }
+        }
+
         if (edit->select_start == edit->select_end) {
             /* no selection so just draw the complete text */
             const char *begin = nk_str_get_const(&edit->string);
@@ -589,41 +613,7 @@ nk_do_edit(nk_flags *state, struct nk_command_buffer *out,
             }
         }
 
-        /* cursor */
-        if (edit->select_start == edit->select_end)
-        {
-            if (edit->cursor >= nk_str_len(&edit->string) ||
-                (cursor_ptr && *cursor_ptr == '\n')) {
-                /* draw cursor at end of line */
-                struct nk_rect cursor;
-                cursor.w = style->cursor_size;
-                cursor.h = font->height;
-                cursor.x = area.x + cursor_pos.x - edit->scrollbar.x;
-                cursor.y = area.y + cursor_pos.y + row_height/2.0f - cursor.h/2.0f;
-                cursor.y -= edit->scrollbar.y;
-                nk_fill_rect(out, cursor, 0, cursor_color);
-            } else {
-                /* draw cursor inside text */
-                int glyph_len;
-                struct nk_rect label;
-                struct nk_text txt;
-
-                nk_rune unicode;
-                NK_ASSERT(cursor_ptr);
-                glyph_len = nk_utf_decode(cursor_ptr, &unicode, 4);
-
-                label.x = area.x + cursor_pos.x - edit->scrollbar.x;
-                label.y = area.y + cursor_pos.y - edit->scrollbar.y;
-                label.w = font->width(font->userdata, font->height, cursor_ptr, glyph_len);
-                label.h = row_height;
-
-                txt.padding = nk_vec2(0,0);
-                txt.background = cursor_color;;
-                txt.text = cursor_text_color;
-                nk_fill_rect(out, label, 0, cursor_color);
-                nk_widget_text(out, label, cursor_ptr, glyph_len, &txt, NK_TEXT_LEFT, font);
-            }
-        }}
+        }
     } else {
         /* not active so just draw text */
         int l = nk_str_len_char(&edit->string);
