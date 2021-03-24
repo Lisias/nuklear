@@ -566,6 +566,7 @@ nk_x11_render(enum nk_anti_aliasing AA, int max_vertex_buffer, int max_element_b
             offset += cmd->elem_count;
         }
         nk_clear(&x11.ctx);
+        nk_buffer_clear(&dev->cmds);
     }
 
     /* default OpenGL state */
@@ -618,6 +619,7 @@ nk_x11_handle_event(XEvent *evt)
         int ret, down = (evt->type == KeyPress);
         KeySym *code = XGetKeyboardMapping(x11.dpy, (KeyCode)evt->xkey.keycode, 1, &ret);
         if (*code == XK_Shift_L || *code == XK_Shift_R) nk_input_key(ctx, NK_KEY_SHIFT, down);
+        else if (*code == XK_Control_L || *code == XK_Control_R) nk_input_key(ctx, NK_KEY_CTRL, down);
         else if (*code == XK_Delete)    nk_input_key(ctx, NK_KEY_DEL, down);
         else if (*code == XK_Return)    nk_input_key(ctx, NK_KEY_ENTER, down);
         else if (*code == XK_Tab)       nk_input_key(ctx, NK_KEY_TAB, down);
