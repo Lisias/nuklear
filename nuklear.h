@@ -19626,7 +19626,8 @@ nk_panel_begin(struct nk_context *ctx, const char *title, enum nk_panel_type pan
         layout->bounds.w -= scrollbar_size.x;*/
     if (!nk_panel_is_nonblock(panel_type)) {
         layout->footer_height = 0;
-        if (!(win->flags & NK_WINDOW_NO_HSCROLLBAR) || win->flags & NK_WINDOW_SCALABLE)
+        //if (!(win->flags & NK_WINDOW_NO_HSCROLLBAR) || win->flags & NK_WINDOW_SCALABLE)
+        if (!(win->flags & NK_WINDOW_NO_HSCROLLBAR))
             layout->footer_height = scrollbar_size.y;
         layout->bounds.h -= layout->footer_height;
     }
@@ -19963,7 +19964,7 @@ nk_panel_end(struct nk_context *ctx)
         struct nk_rect scaler;
         scaler.w = scrollbar_size.x;
         scaler.h = scrollbar_size.y;
-        scaler.y = layout->bounds.y + layout->bounds.h;
+        scaler.y = layout->bounds.y + layout->bounds.h - scrollbar_size.y;
         if (layout->flags & NK_WINDOW_SCALE_LEFT)
             scaler.x = layout->bounds.x - panel_padding.x * 0.5f;
         else scaler.x = layout->bounds.x + layout->bounds.w + panel_padding.x;
