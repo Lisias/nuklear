@@ -7450,24 +7450,40 @@ nk_text_clamp(const struct nk_user_font *font, const char *text,
     while (glyph_len && (width < space) && (len < text_len)) {
         len += glyph_len;
         s = font->width(font->userdata, font->height, text, len);
-        for (i = 0; i < sep_count; ++i) {
-            if (unicode != sep_list[i]) continue;
+
+        if (unicode == '\r') {
+        }
+
+        else if (unicode == '\n') {
             sep_width = last_width = width;
             sep_g = g+1;
             sep_len = len;
             break;
         }
-        if (i == sep_count){
-            last_width = sep_width = width;
-            sep_g = g+1;
+
+        else {
+
+            for (i = 0; i < sep_count; ++i) {
+                if (unicode != sep_list[i]) continue;
+                sep_width = last_width = width;
+                sep_g = g+1;
+                sep_len = len;
+                break;
+            }
+            
+            if (i == sep_count){
+                last_width = sep_width = width;
+                sep_g = g+1;
+            }
         }
+
         width = s;
         glyph_len = nk_utf_decode(&text[len], &unicode, text_len - len);
         g++;
     }
     if (len >= text_len) {
         *glyphs = g;
-        *text_width = last_width;
+        *text_width = width;
         return len;
     } else {
         *glyphs = sep_g;
@@ -29622,8 +29638,14 @@ nk_tooltip(struct nk_context *ctx, const char *text)
     struct nk_vec2 padding;
 
     int text_len;
-    float text_width;
-    float text_height;
+    float text_width = 0.0f;
+    float text_height = 0.0f;
+    int glyphs = 0;
+    int fitting = 0;
+    int rows = 0;
+    float width;
+    int done = 0;
+    NK_INTERN nk_rune seperator[] = {' '};
 
     NK_ASSERT(ctx);
     NK_ASSERT(ctx->current);
@@ -29638,17 +29660,45 @@ nk_tooltip(struct nk_context *ctx, const char *text)
 
     /* calculate size of the text and tooltip */
     text_len = nk_strlen(text);
+#if 1
+    fitting = nk_text_clamp(style->font, text, text_len, 100000.0f, &glyphs, &width, seperator,NK_LEN(seperator));
+    while (done < text_len) {
+        if (!fitting) break;
+        done += fitting;
+        text_width = NK_MAX(width, text_width);
+        rows++;
+        fitting = nk_text_clamp(style->font, &text[done], text_len - done, 100000.0f, &glyphs, &width, seperator,NK_LEN(seperator));
+    }
+#else
     text_width = style->font->width(style->font->userdata,
                     style->font->height, text, text_len);
-    text_width += (4 * padding.x);
-    text_height = (style->font->height + 2 * padding.y);
+#endif
 
+    text_width += (4 * padding.x);
+    text_height = 2 * padding.y + style->font->height;
+
+#if 1
+    /* execute tooltip and fill with text */
+    if (nk_tooltip_begin(ctx, (float)text_width)) {
+        nk_layout_row_dynamic(ctx, (float)text_height, 1);
+        done = 0;
+        fitting = nk_text_clamp(style->font, text, text_len, 100000.0f, &glyphs, &width, seperator,NK_LEN(seperator));
+        while (done < text_len) {
+            if (!fitting) break;
+            nk_text(ctx, &text[done], fitting, NK_TEXT_LEFT);
+            done += fitting;
+            fitting = nk_text_clamp(style->font, &text[done], text_len - done, 100000.0f, &glyphs, &width, seperator,NK_LEN(seperator));
+        }
+        nk_tooltip_end(ctx);
+    }
+#else
     /* execute tooltip and fill with text */
     if (nk_tooltip_begin(ctx, (float)text_width)) {
         nk_layout_row_dynamic(ctx, (float)text_height, 1);
         nk_text(ctx, text, text_len, NK_TEXT_CENTERED);
         nk_tooltip_end(ctx);
     }
+#endif
 }
 #ifdef NK_INCLUDE_STANDARD_VARARGS
 NK_API void

@@ -1040,24 +1040,40 @@ nk_text_clamp(const struct nk_user_font *font, const char *text,
     while (glyph_len && (width < space) && (len < text_len)) {
         len += glyph_len;
         s = font->width(font->userdata, font->height, text, len);
-        for (i = 0; i < sep_count; ++i) {
-            if (unicode != sep_list[i]) continue;
+
+        if (unicode == '\r') {
+        }
+
+        else if (unicode == '\n') {
             sep_width = last_width = width;
             sep_g = g+1;
             sep_len = len;
             break;
         }
-        if (i == sep_count){
-            last_width = sep_width = width;
-            sep_g = g+1;
+
+        else {
+
+            for (i = 0; i < sep_count; ++i) {
+                if (unicode != sep_list[i]) continue;
+                sep_width = last_width = width;
+                sep_g = g+1;
+                sep_len = len;
+                break;
+            }
+            
+            if (i == sep_count){
+                last_width = sep_width = width;
+                sep_g = g+1;
+            }
         }
+
         width = s;
         glyph_len = nk_utf_decode(&text[len], &unicode, text_len - len);
         g++;
     }
     if (len >= text_len) {
         *glyphs = g;
-        *text_width = last_width;
+        *text_width = width;
         return len;
     } else {
         *glyphs = sep_g;
