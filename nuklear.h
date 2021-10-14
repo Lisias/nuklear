@@ -27590,6 +27590,7 @@ nk_edit_string(struct nk_context *ctx, nk_flags flags,
     nk_flags state;
     struct nk_text_edit *edit;
     struct nk_window *win;
+    int ulen;
 
     NK_ASSERT(ctx);
     NK_ASSERT(memory);
@@ -27601,12 +27602,13 @@ nk_edit_string(struct nk_context *ctx, nk_flags flags,
     win = ctx->current;
     hash = win->edit.seq;
     edit = &ctx->text_edit;
+    ulen = nk_utf_len(memory, *len);
     nk_textedit_clear_state(&ctx->text_edit, (flags & NK_EDIT_MULTILINE)?
         NK_TEXT_EDIT_MULTI_LINE: NK_TEXT_EDIT_SINGLE_LINE, filter);
 
     if (win->edit.active && hash == win->edit.name) {
         if (flags & NK_EDIT_NO_CURSOR)
-            edit->cursor = nk_utf_len(memory, *len);
+            edit->cursor = ulen;
         else edit->cursor = win->edit.cursor;
         if (!(flags & NK_EDIT_SELECTABLE)) {
             edit->select_start = win->edit.cursor;
@@ -27620,6 +27622,17 @@ nk_edit_string(struct nk_context *ctx, nk_flags flags,
         edit->scrollbar.y = (float)win->edit.scrollbar.y;
         edit->active = nk_true;
     } else edit->active = nk_false;
+
+    /* fix out of bounds errors/crashes */
+    if (edit->cursor > ulen) {
+        edit->cursor = ulen;
+    }
+    if (edit->select_start > ulen) {
+        edit->select_start = ulen;
+    }
+    if (edit->select_end > ulen) {
+        edit->select_end = ulen;
+    }
 
     max = NK_MAX(1, max);
     *len = NK_MIN(*len, max-1);
