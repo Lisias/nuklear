@@ -22314,8 +22314,10 @@ nk_layout_peek(struct nk_rect *bounds, struct nk_context *ctx)
     NK_ASSERT(ctx);
     NK_ASSERT(ctx->current);
     NK_ASSERT(ctx->current->layout);
-    if (!ctx || !ctx->current || !ctx->current->layout)
+    if (!ctx || !ctx->current || !ctx->current->layout) {
+        *bounds = nk_rect(0,0,0,0);
         return;
+    }
 
     win = ctx->current;
     layout = win->layout;
@@ -22696,11 +22698,11 @@ nk_group_scrolled_offset_begin(struct nk_context *ctx,
 
     win = ctx->current;
     nk_panel_alloc_space(&bounds, ctx);
-    {const struct nk_rect *c = &win->layout->clip;
+    /*{const struct nk_rect *c = &win->layout->clip;
     if (!NK_INTERSECT(c->x, c->y, c->w, c->h, bounds.x, bounds.y, bounds.w, bounds.h) &&
         !(flags & NK_WINDOW_MOVABLE)) {
         return 0;
-    }}
+    }}*/
     if (win->flags & NK_WINDOW_ROM)
         flags |= NK_WINDOW_ROM;
 
