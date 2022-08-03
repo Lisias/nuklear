@@ -20898,9 +20898,8 @@ nk_nonblock_begin(struct nk_context *ctx,
             if (sy < ctx->popup_screen_bounds.y) {
                 sy = ctx->popup_screen_bounds.y;
             }
-            // real h is impossible to determine, so instead make it shorter
             else if ((sy + h) >= (ctx->popup_screen_bounds.y + ctx->popup_screen_bounds.h)) {
-                h = NK_MAX(50.0f, (ctx->popup_screen_bounds.y + ctx->popup_screen_bounds.h) - sy);
+                sy = body.y - body.h - header.h;
             }
         }
 
