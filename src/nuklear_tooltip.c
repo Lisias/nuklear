@@ -7,7 +7,7 @@
  *
  * ===============================================================*/
 NK_API nk_bool
-nk_tooltip_begin(struct nk_context *ctx, float width)
+nk_tooltip_begin(struct nk_context *ctx, float width, float height)
 {
     int x,y,w,h;
     float sx,sy;
@@ -38,6 +38,7 @@ nk_tooltip_begin(struct nk_context *ctx, float width)
     h = nk_iceilf(nk_null_rect.h);
     sx = in->mouse.pos.x + offset.x;
     sy = in->mouse.pos.y + offset.y;
+    height = NK_MAX(height, 50.0f);
     if (ctx->popup_screen_bounds.w > 0.0f && ctx->popup_screen_bounds.h > 0.0f) {
         if (sx < ctx->popup_screen_bounds.x) {
             sx = ctx->popup_screen_bounds.x;
@@ -48,9 +49,8 @@ nk_tooltip_begin(struct nk_context *ctx, float width)
         if (sy < ctx->popup_screen_bounds.y) {
             sy = ctx->popup_screen_bounds.y;
         }
-        /* h is unknown here, so hardcode some value that is OK for single text line tooltips... */
-        else if ((sy + 50.0f) >= (ctx->popup_screen_bounds.y + ctx->popup_screen_bounds.h)) {
-            sy = ctx->popup_screen_bounds.y + ctx->popup_screen_bounds.h - 50.0f;
+        else if ((sy + height) >= (ctx->popup_screen_bounds.y + ctx->popup_screen_bounds.h)) {
+            sy = ctx->popup_screen_bounds.y + ctx->popup_screen_bounds.h - height;
         }
     }
     
@@ -91,7 +91,7 @@ nk_tooltip(struct nk_context *ctx, const char *text)
     float text_height = 0.0f;
     int glyphs = 0;
     int fitting = 0;
-    int rows = 0;
+    int rows = 1;
     float width;
     int done = 0;
     NK_INTERN nk_rune seperator[] = {' '};
@@ -128,7 +128,7 @@ nk_tooltip(struct nk_context *ctx, const char *text)
 
 #if 1
     /* execute tooltip and fill with text */
-    if (nk_tooltip_begin(ctx, (float)text_width)) {
+    if (nk_tooltip_begin(ctx, (float)text_width, text_height*(float)rows)) {
         nk_layout_row_dynamic(ctx, (float)text_height, 1);
         done = 0;
         fitting = nk_text_clamp(style->font, text, text_len, 100000.0f, &glyphs, &width, seperator,NK_LEN(seperator));
